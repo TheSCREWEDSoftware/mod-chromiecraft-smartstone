@@ -7,13 +7,19 @@ SET @costumeCat_legendary := 3;
 SET @costumeCat_epic := 4;
 SET @costumeCat_boss := 5;
 
-SET @costumeCat_1 := @costumeCat_uncommon; -- Uncommon
-SET @costumeCat_2 := @costumeCat_uncommon+1; -- Rare
-SET @costumeCat_3 := @costumeCat_uncommon+2; -- Legendary
-SET @costumeCat_4 := @costumeCat_uncommon+3; -- Epic
-SET @costumeCat_5 := @costumeCat_uncommon+4; -- Boss
+SET @costumeCat_1 := @costumeCat_uncommon;
+SET @costumeCat_2 := @costumeCat_uncommon+1;
+SET @costumeCat_3 := @costumeCat_uncommon+2;
+SET @costumeCat_4 := @costumeCat_uncommon+3;
+SET @costumeCat_5 := @costumeCat_uncommon+4;
 
--- Use this to find the possible icons: https://wowgaming.altervista.org/aowow/?icons
+-- https://wowgaming.altervista.org/aowow/?icons
+SET @costumeCat_1_icon := "Inv_jewelcrafting_seasprayemerald_02"; -- Uncommon
+SET @costumeCat_2_icon := "Inv_jewelcrafting_empyreansapphire_02"; -- Rare
+SET @costumeCat_3_icon := "Inv_jewelcrafting_pyrestone_02"; -- Legendary
+SET @costumeCat_4_icon := "Inv_jewelcrafting_shadowsongamethyst_02"; -- Epic
+SET @costumeCat_5_icon := "Spell_Arcane_PrismaticCloak"; -- Boss
+
 -- Uncommon
 SET @costumeCat_1_icon := "Inv_jewelcrafting_seasprayemerald_02";
 SET @costumeCat_1_icon_x := 30;
@@ -63,17 +69,17 @@ SET @Subscription_None := 0; -- Free for everyone
 SET @Subscription_Admirer := @Subscription_None+1; -- Sub Tier 1 Admier
 SET @Subscription_Watcher := @Subscription_None+2; -- Sub Tier 2 Watcher
 SET @Subscription_Keeper := @Subscription_None+3; -- Sub Tier 3 Keeper
-SET @Subscription_Shop := @Subscription_None+4; -- Purchausable/Command only (use value 4 or higher).
+SET @Subscription_Shop := @Subscription_None+4; -- 4 or higher only works via the command
 
-DELETE FROM `smartstone_categories` WHERE `Id` BETWEEN @costumeCat_uncommon AND @costumeCat_boss; -- use the last category created after the `AND`
+DELETE FROM `smartstone_categories` WHERE `Id` BETWEEN @costumeCat_uncommon AND @costumeCat_boss; -- use the latest caterogy that was added
 INSERT INTO `smartstone_categories` (`Id`, `CategoryType`, `Title`, `SubscriptionLevel`, `NPCTextId`, `Enabled`) VALUES
-(@costumeCat_uncommon, 0, @costumeCat_1_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_rare, 0, @costumeCat_2_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_legendary, 0, @costumeCat_3_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_epic, 0, @costumeCat_4_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_boss, 0, @costumeCat_5_icon_final, @Subscription_None, 0, 1);
+(@costumeCat_uncommon, 0,@costumeCat_1_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_rare, 0,@costumeCat_2_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_legendary, 0,@costumeCat_3_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_epic, 0,@costumeCat_4_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_boss, 0,@costumeCat_5_icon_final, @Subscription_None, 0, 1);
 
-DELETE FROM `smartstone_costumes` W@HERE `Id` BETWEEN @costumeID_start AND @costumeID_end;
+DELETE FROM `smartstone_costumes` WHERE `Id` BETWEEN @costumeID_start AND @costumeID_end;
 INSERT INTO `smartstone_costumes` (`Id`, `DisplayId`, `Category`, `SubscriptionLevel`, `Duration`, `Description`, `Enabled`) VALUES
 (@costumeID_start+0, 4763, @costumeCat_uncommon, @Subscription_Shop, 0, "Naga Costume", 1),	-- 5000
 (@costumeID_start+1, 4972, @costumeCat_uncommon, @Subscription_Shop, 0, "Naga Costume", 1),	-- 5000
@@ -131,79 +137,79 @@ INSERT INTO `smartstone_costumes` (`Id`, `DisplayId`, `Category`, `SubscriptionL
 (@costumeID_start+53, 1202, @costumeCat_uncommon, @Subscription_Shop, 0, "Zombie Costume", 1),	-- 5000
 (@costumeID_start+54, 16480, @costumeCat_uncommon, @Subscription_Shop, 0, "Imp Costume", 1),	-- 5000
 (@costumeID_start+55, 17035, @costumeCat_uncommon, @Subscription_Shop, 0, "Imp Costume", 1),	-- 5000
-(@costumeID_start+56, 25240, @costumeCat_epic, @Subscription_Shop, 0, "Undead Vrykul Costume", 1),	-- 10000
-(@costumeID_start+57, 351, @costumeCat_epic, @Subscription_Shop, 0, "Pirate Captain Costume", 1),	-- 10000
-(@costumeID_start+58, 28132, @costumeCat_epic, @Subscription_Shop, 0, "Iron Giant Costume", 1),	-- 10000
-(@costumeID_start+59, 24531, @costumeCat_epic, @Subscription_Shop, 0, "Frost Giant Costume", 1),	-- 10000
-(@costumeID_start+60, 26302, @costumeCat_epic, @Subscription_Shop, 0, "Stone Giant Costume", 1),	-- 10000
-(@costumeID_start+61, 18700, @costumeCat_epic, @Subscription_Shop, 0, "Stone Giant Costume", 1),	-- 10000
-(@costumeID_start+62, 18227, @costumeCat_epic, @Subscription_Shop, 0, "Fungal Giant Costume", 1),	-- 10000
-(@costumeID_start+63, 19687, @costumeCat_epic, @Subscription_Shop, 0, "Withered Giant Costume", 1),	-- 10000
-(@costumeID_start+64, 17057, @costumeCat_epic, @Subscription_Shop, 0, "Corrupted Treant Costume", 1),	-- 10000
-(@costumeID_start+65, 2078, @costumeCat_epic, @Subscription_Shop, 0, "Petrified Treant Costume", 1),	-- 10000
-(@costumeID_start+66, 12818, @costumeCat_epic, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
-(@costumeID_start+67, 15961, @costumeCat_epic, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
-(@costumeID_start+68, 12819, @costumeCat_epic, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
-(@costumeID_start+69, 11714, @costumeCat_epic, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
-(@costumeID_start+70, 2723, @costumeCat_epic, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
-(@costumeID_start+71, 17340, @costumeCat_epic, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
-(@costumeID_start+72, 11397, @costumeCat_epic, @Subscription_Shop, 0, "Skeleton Costume", 1),	-- 10000
-(@costumeID_start+73, 15438, @costumeCat_epic, @Subscription_Shop, 0, "Arcane Wraith Costume", 1),	-- 10000
-(@costumeID_start+74, 25801, @costumeCat_epic, @Subscription_Shop, 0, "Vrykul Costume", 1),	-- 10000
-(@costumeID_start+75, 21931, @costumeCat_epic, @Subscription_Shop, 0, "Vrykul Costume", 1),	-- 10000
-(@costumeID_start+76, 25837, @costumeCat_epic, @Subscription_Shop, 0, "Frost Vrykul Costume", 1),	-- 10000
-(@costumeID_start+77, 27549, @costumeCat_epic, @Subscription_Shop, 0, "Frost Vrykul Costume", 1),	-- 10000
-(@costumeID_start+78, 25982, @costumeCat_epic, @Subscription_Shop, 0, "Iron Vrykul Costume", 1),	-- 10000
-(@costumeID_start+79, 25748, @costumeCat_epic, @Subscription_Shop, 0, "Iron Dwarf Costume", 1),	-- 10000
-(@costumeID_start+80, 23643, @costumeCat_epic, @Subscription_Shop, 0, "Taunka Costume", 1),	-- 10000
-(@costumeID_start+81, 16875, @costumeCat_epic, @Subscription_Shop, 0, "Arakkoa Costume", 1),	-- 10000
-(@costumeID_start+82, 17005, @costumeCat_epic, @Subscription_Shop, 0, "Arakkoa Costume", 1),	-- 10000
-(@costumeID_start+83, 1014, @costumeCat_epic, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
-(@costumeID_start+84, 1013, @costumeCat_epic, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
-(@costumeID_start+85, 2012, @costumeCat_epic, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
-(@costumeID_start+86, 29024, @costumeCat_epic, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
-(@costumeID_start+87, 28003, @costumeCat_epic, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
-(@costumeID_start+88, 28004, @costumeCat_epic, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
-(@costumeID_start+89, 19925, @costumeCat_epic, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
-(@costumeID_start+90, 19937, @costumeCat_epic, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
-(@costumeID_start+91, 19751, @costumeCat_epic, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
-(@costumeID_start+92, 19752, @costumeCat_epic, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
-(@costumeID_start+93, 16891, @costumeCat_epic, @Subscription_Shop, 0, "Fel Imp Costume", 1),	-- 10000
-(@costumeID_start+94, 16888, @costumeCat_epic, @Subscription_Shop, 0, "Fel Imp Costume", 1),	-- 10000
-(@costumeID_start+95, 14255, @costumeCat_epic, @Subscription_Shop, 0, "Felguard Costume", 1),	-- 10000
-(@costumeID_start+96, 4162, @costumeCat_epic, @Subscription_Shop, 0, "Succubus Costume", 1),	-- 10000
-(@costumeID_start+97, 2834, @costumeCat_epic, @Subscription_Shop, 0, "Succubus Costume", 1),	-- 10000
-(@costumeID_start+98, 27572, @costumeCat_legendary, @Subscription_Shop, 0, "Crystal Dryad Costume", 1),	-- 20000
-(@costumeID_start+99, 22485, @costumeCat_legendary, @Subscription_Shop, 0, "Frost Nymph Costume", 1),	-- 20000
-(@costumeID_start+100, 30414, @costumeCat_legendary, @Subscription_Shop, 0, "Pandaren Costume", 1),	-- 20000
-(@costumeID_start+101, 23267, @costumeCat_legendary, @Subscription_Shop, 0, "Eredar Costume", 1),	-- 20000
-(@costumeID_start+102, 17689, @costumeCat_legendary, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
-(@costumeID_start+103, 17688, @costumeCat_legendary, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
-(@costumeID_start+104, 18659, @costumeCat_legendary, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
-(@costumeID_start+105, 19921, @costumeCat_legendary, @Subscription_Shop, 0, "Ogre Warlord Costume", 1),	-- 20000
-(@costumeID_start+106, 19938, @costumeCat_legendary, @Subscription_Shop, 0, "Ogre Warlord Costume", 1),	-- 20000
-(@costumeID_start+107, 19935, @costumeCat_legendary, @Subscription_Shop, 0, "Ogre Mage Lord Costume", 1),	-- 20000
-(@costumeID_start+108, 19941, @costumeCat_legendary, @Subscription_Shop, 0, "Ogre Mage Lord Costume", 1),	-- 20000
-(@costumeID_start+109, 24682, @costumeCat_legendary, @Subscription_Shop, 0, "Lich Costume", 1),	-- 20000
-(@costumeID_start+110, 24991, @costumeCat_legendary, @Subscription_Shop, 0, "Val'kyr Costume", 1),	-- 20000
-(@costumeID_start+111, 29267, @costumeCat_legendary, @Subscription_Shop, 0, "Val'kyr Costume", 1),	-- 20000
-(@costumeID_start+112, 17096, @costumeCat_legendary, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
-(@costumeID_start+113, 17097, @costumeCat_legendary, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
-(@costumeID_start+114, 17099, @costumeCat_legendary, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
-(@costumeID_start+115, 22809, @costumeCat_legendary, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
-(@costumeID_start+116, 12990, @costumeCat_legendary, @Subscription_Shop, 0, "Dreadlord Costume", 1),	-- 20000
-(@costumeID_start+117, 1468, @costumeCat_legendary, @Subscription_Shop, 0, "Dreadlord Costume", 1),	-- 20000
-(@costumeID_start+118, 10927, @costumeCat_legendary, @Subscription_Shop, 0, "Fel Succubus Costume", 1),	-- 20000
-(@costumeID_start+119, 17543, @costumeCat_legendary, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
-(@costumeID_start+120, 19586, @costumeCat_legendary, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
-(@costumeID_start+121, 19587, @costumeCat_legendary, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
-(@costumeID_start+122, 19588, @costumeCat_legendary, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
-(@costumeID_start+123, 11914, @costumeCat_legendary, @Subscription_Shop, 0, "Sphinx Costume", 1),	-- 20000
-(@costumeID_start+124, 1125, @costumeCat_rare, @Subscription_Shop, 0, "Titan Costume", 1),	-- 50000
-(@costumeID_start+125, 18286, @costumeCat_rare, @Subscription_Shop, 0, "Archimonde Costume", 1),	-- 50000
-(@costumeID_start+126, 22833, @costumeCat_rare, @Subscription_Shop, 0, "Lord Jaraxxus Costume", 1),	-- 50000
-(@costumeID_start+127, 30810, @costumeCat_rare, @Subscription_Shop, 0, "Bone Wraith Costume", 1),	-- 50000
-(@costumeID_start+128, 15945, @costumeCat_rare, @Subscription_Shop, 0, "Kel'Thuzad Costume", 1),	-- 50000
-(@costumeID_start+129, 28641, @costumeCat_rare, @Subscription_Shop, 0, "Algalon Costume", 1),	-- 50000
+(@costumeID_start+56, 25240, @costumeCat_rare, @Subscription_Shop, 0, "Undead Vrykul Costume", 1),	-- 10000
+(@costumeID_start+57, 351, @costumeCat_rare, @Subscription_Shop, 0, "Pirate Captain Costume", 1),	-- 10000
+(@costumeID_start+58, 28132, @costumeCat_rare, @Subscription_Shop, 0, "Iron Giant Costume", 1),	-- 10000
+(@costumeID_start+59, 24531, @costumeCat_rare, @Subscription_Shop, 0, "Frost Giant Costume", 1),	-- 10000
+(@costumeID_start+60, 26302, @costumeCat_rare, @Subscription_Shop, 0, "Stone Giant Costume", 1),	-- 10000
+(@costumeID_start+61, 18700, @costumeCat_rare, @Subscription_Shop, 0, "Stone Giant Costume", 1),	-- 10000
+(@costumeID_start+62, 18227, @costumeCat_rare, @Subscription_Shop, 0, "Fungal Giant Costume", 1),	-- 10000
+(@costumeID_start+63, 19687, @costumeCat_rare, @Subscription_Shop, 0, "Withered Giant Costume", 1),	-- 10000
+(@costumeID_start+64, 17057, @costumeCat_rare, @Subscription_Shop, 0, "Corrupted Treant Costume", 1),	-- 10000
+(@costumeID_start+65, 2078, @costumeCat_rare, @Subscription_Shop, 0, "Petrified Treant Costume", 1),	-- 10000
+(@costumeID_start+66, 12818, @costumeCat_rare, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
+(@costumeID_start+67, 15961, @costumeCat_rare, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
+(@costumeID_start+68, 12819, @costumeCat_rare, @Subscription_Shop, 0, "Abomination Costume", 1),	-- 10000
+(@costumeID_start+69, 11714, @costumeCat_rare, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
+(@costumeID_start+70, 2723, @costumeCat_rare, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
+(@costumeID_start+71, 17340, @costumeCat_rare, @Subscription_Shop, 0, "Dryad Costume", 1),	-- 10000
+(@costumeID_start+72, 11397, @costumeCat_rare, @Subscription_Shop, 0, "Skeleton Costume", 1),	-- 10000
+(@costumeID_start+73, 15438, @costumeCat_rare, @Subscription_Shop, 0, "Arcane Wraith Costume", 1),	-- 10000
+(@costumeID_start+74, 25801, @costumeCat_rare, @Subscription_Shop, 0, "Vrykul Costume", 1),	-- 10000
+(@costumeID_start+75, 21931, @costumeCat_rare, @Subscription_Shop, 0, "Vrykul Costume", 1),	-- 10000
+(@costumeID_start+76, 25837, @costumeCat_rare, @Subscription_Shop, 0, "Frost Vrykul Costume", 1),	-- 10000
+(@costumeID_start+77, 27549, @costumeCat_rare, @Subscription_Shop, 0, "Frost Vrykul Costume", 1),	-- 10000
+(@costumeID_start+78, 25982, @costumeCat_rare, @Subscription_Shop, 0, "Iron Vrykul Costume", 1),	-- 10000
+(@costumeID_start+79, 25748, @costumeCat_rare, @Subscription_Shop, 0, "Iron Dwarf Costume", 1),	-- 10000
+(@costumeID_start+80, 23643, @costumeCat_rare, @Subscription_Shop, 0, "Taunka Costume", 1),	-- 10000
+(@costumeID_start+81, 16875, @costumeCat_rare, @Subscription_Shop, 0, "Arakkoa Costume", 1),	-- 10000
+(@costumeID_start+82, 17005, @costumeCat_rare, @Subscription_Shop, 0, "Arakkoa Costume", 1),	-- 10000
+(@costumeID_start+83, 1014, @costumeCat_rare, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
+(@costumeID_start+84, 1013, @costumeCat_rare, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
+(@costumeID_start+85, 2012, @costumeCat_rare, @Subscription_Shop, 0, "Satyr Costume", 1),	-- 10000
+(@costumeID_start+86, 29024, @costumeCat_rare, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
+(@costumeID_start+87, 28003, @costumeCat_rare, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
+(@costumeID_start+88, 28004, @costumeCat_rare, @Subscription_Shop, 0, "Faceless Costume", 1),	-- 10000
+(@costumeID_start+89, 19925, @costumeCat_rare, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
+(@costumeID_start+90, 19937, @costumeCat_rare, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
+(@costumeID_start+91, 19751, @costumeCat_rare, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
+(@costumeID_start+92, 19752, @costumeCat_rare, @Subscription_Shop, 0, "Elite Ogre Costume", 1),	-- 10000
+(@costumeID_start+93, 16891, @costumeCat_rare, @Subscription_Shop, 0, "Fel Imp Costume", 1),	-- 10000
+(@costumeID_start+94, 16888, @costumeCat_rare, @Subscription_Shop, 0, "Fel Imp Costume", 1),	-- 10000
+(@costumeID_start+95, 14255, @costumeCat_rare, @Subscription_Shop, 0, "Felguard Costume", 1),	-- 10000
+(@costumeID_start+96, 4162, @costumeCat_rare, @Subscription_Shop, 0, "Succubus Costume", 1),	-- 10000
+(@costumeID_start+97, 2834, @costumeCat_rare, @Subscription_Shop, 0, "Succubus Costume", 1),	-- 10000
+(@costumeID_start+98, 27572, @costumeCat_epic, @Subscription_Shop, 0, "Crystal Dryad Costume", 1),	-- 20000
+(@costumeID_start+99, 22485, @costumeCat_epic, @Subscription_Shop, 0, "Frost Nymph Costume", 1),	-- 20000
+(@costumeID_start+100, 30414, @costumeCat_epic, @Subscription_Shop, 0, "Pandaren Costume", 1),	-- 20000
+(@costumeID_start+101, 23267, @costumeCat_epic, @Subscription_Shop, 0, "Eredar Costume", 1),	-- 20000
+(@costumeID_start+102, 17689, @costumeCat_epic, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
+(@costumeID_start+103, 17688, @costumeCat_epic, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
+(@costumeID_start+104, 18659, @costumeCat_epic, @Subscription_Shop, 0, "Ethereal Costume", 1),	-- 20000
+(@costumeID_start+105, 19921, @costumeCat_epic, @Subscription_Shop, 0, "Ogre Warlord Costume", 1),	-- 20000
+(@costumeID_start+106, 19938, @costumeCat_epic, @Subscription_Shop, 0, "Ogre Warlord Costume", 1),	-- 20000
+(@costumeID_start+107, 19935, @costumeCat_epic, @Subscription_Shop, 0, "Ogre Mage Lord Costume", 1),	-- 20000
+(@costumeID_start+108, 19941, @costumeCat_epic, @Subscription_Shop, 0, "Ogre Mage Lord Costume", 1),	-- 20000
+(@costumeID_start+109, 24682, @costumeCat_epic, @Subscription_Shop, 0, "Lich Costume", 1),	-- 20000
+(@costumeID_start+110, 24991, @costumeCat_epic, @Subscription_Shop, 0, "Val'kyr Costume", 1),	-- 20000
+(@costumeID_start+111, 29267, @costumeCat_epic, @Subscription_Shop, 0, "Val'kyr Costume", 1),	-- 20000
+(@costumeID_start+112, 17096, @costumeCat_epic, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
+(@costumeID_start+113, 17097, @costumeCat_epic, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
+(@costumeID_start+114, 17099, @costumeCat_epic, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
+(@costumeID_start+115, 22809, @costumeCat_epic, @Subscription_Shop, 0, "Doomguard Costume", 1),	-- 20000
+(@costumeID_start+116, 12990, @costumeCat_epic, @Subscription_Shop, 0, "Dreadlord Costume", 1),	-- 20000
+(@costumeID_start+117, 1468, @costumeCat_epic, @Subscription_Shop, 0, "Dreadlord Costume", 1),	-- 20000
+(@costumeID_start+118, 10927, @costumeCat_epic, @Subscription_Shop, 0, "Fel Succubus Costume", 1),	-- 20000
+(@costumeID_start+119, 17543, @costumeCat_epic, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
+(@costumeID_start+120, 19586, @costumeCat_epic, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
+(@costumeID_start+121, 19587, @costumeCat_epic, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
+(@costumeID_start+122, 19588, @costumeCat_epic, @Subscription_Shop, 0, "Shivan Costume", 1),	-- 20000
+(@costumeID_start+123, 11914, @costumeCat_epic, @Subscription_Shop, 0, "Sphinx Costume", 1),	-- 20000
+(@costumeID_start+124, 1125, @costumeCat_legendary, @Subscription_Shop, 0, "Titan Costume", 1),	-- 50000
+(@costumeID_start+125, 18286, @costumeCat_legendary, @Subscription_Shop, 0, "Archimonde Costume", 1),	-- 50000
+(@costumeID_start+126, 22833, @costumeCat_legendary, @Subscription_Shop, 0, "Lord Jaraxxus Costume", 1),	-- 50000
+(@costumeID_start+127, 30810, @costumeCat_legendary, @Subscription_Shop, 0, "Bone Wraith Costume", 1),	-- 50000
+(@costumeID_start+128, 15945, @costumeCat_legendary, @Subscription_Shop, 0, "Kel'Thuzad Costume", 1),	-- 50000
+(@costumeID_start+129, 28641, @costumeCat_legendary, @Subscription_Shop, 0, "Algalon Costume", 1),	-- 50000
 (@costumeID_start+130, 2029, @costumeCat_boss, @Subscription_Watcher, 0, 'Edwin VanCleef', 1),
 (@costumeID_start+131, 2043, @costumeCat_boss, @Subscription_Watcher, 0, 'High Inquisitor Whitemane', 1);
