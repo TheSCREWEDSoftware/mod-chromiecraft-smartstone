@@ -7,19 +7,13 @@ SET @costumeCat_legendary := 3;
 SET @costumeCat_epic := 4;
 SET @costumeCat_boss := 5;
 
-SET @costumeCat_1 := @costumeCat_uncommon;
-SET @costumeCat_2 := @costumeCat_uncommon+1;
-SET @costumeCat_3 := @costumeCat_uncommon+2;
-SET @costumeCat_4 := @costumeCat_uncommon+3;
-SET @costumeCat_5 := @costumeCat_uncommon+4;
+SET @costumeCat_1 := @costumeCat_uncommon; -- Uncommon
+SET @costumeCat_2 := @costumeCat_uncommon+1; -- Rare
+SET @costumeCat_3 := @costumeCat_uncommon+2; -- Legendary
+SET @costumeCat_4 := @costumeCat_uncommon+3; -- Epic
+SET @costumeCat_5 := @costumeCat_uncommon+4; -- Boss
 
--- https://wowgaming.altervista.org/aowow/?icons
-SET @costumeCat_1_icon := "Inv_jewelcrafting_seasprayemerald_02"; -- Uncommon
-SET @costumeCat_2_icon := "Inv_jewelcrafting_empyreansapphire_02"; -- Rare
-SET @costumeCat_3_icon := "Inv_jewelcrafting_pyrestone_02"; -- Legendary
-SET @costumeCat_4_icon := "Inv_jewelcrafting_shadowsongamethyst_02"; -- Epic
-SET @costumeCat_5_icon := "Spell_Arcane_PrismaticCloak"; -- Boss
-
+-- Use this to find the possible icons: https://wowgaming.altervista.org/aowow/?icons
 -- Uncommon
 SET @costumeCat_1_icon := "Inv_jewelcrafting_seasprayemerald_02";
 SET @costumeCat_1_icon_x := 30;
@@ -69,15 +63,15 @@ SET @Subscription_None := 0; -- Free for everyone
 SET @Subscription_Admirer := @Subscription_None+1; -- Sub Tier 1 Admier
 SET @Subscription_Watcher := @Subscription_None+2; -- Sub Tier 2 Watcher
 SET @Subscription_Keeper := @Subscription_None+3; -- Sub Tier 3 Keeper
-SET @Subscription_Shop := @Subscription_None+4; -- 4 or higher only works via the command
+SET @Subscription_Shop := @Subscription_None+4; -- Purchausable/Command only (use value 4 or higher).
 
-DELETE FROM `smartstone_categories` WHERE `Id` BETWEEN @costumeCat_uncommon AND @costumeCat_boss; -- use the latest caterogy that was added
+DELETE FROM `smartstone_categories` WHERE `Id` BETWEEN @costumeCat_uncommon AND @costumeCat_boss; -- use the last category created after the `AND`
 INSERT INTO `smartstone_categories` (`Id`, `CategoryType`, `Title`, `SubscriptionLevel`, `NPCTextId`, `Enabled`) VALUES
-(@costumeCat_uncommon, 0,@costumeCat_1_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_rare, 0,@costumeCat_2_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_legendary, 0,@costumeCat_3_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_epic, 0,@costumeCat_4_icon_final, @Subscription_None, 0, 1),
-(@costumeCat_boss, 0,@costumeCat_5_icon_final, @Subscription_None, 0, 1);
+(@costumeCat_uncommon, 0, @costumeCat_1_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_rare, 0, @costumeCat_2_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_legendary, 0, @costumeCat_3_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_epic, 0, @costumeCat_4_icon_final, @Subscription_None, 0, 1),
+(@costumeCat_boss, 0, @costumeCat_5_icon_final, @Subscription_None, 0, 1);
 
 DELETE FROM `smartstone_costumes` WHERE `Id` BETWEEN @costumeID_start AND @costumeID_end;
 INSERT INTO `smartstone_costumes` (`Id`, `DisplayId`, `Category`, `SubscriptionLevel`, `Duration`, `Description`, `Enabled`) VALUES
