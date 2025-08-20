@@ -50,7 +50,7 @@ void Smartstone::LoadPets()
 void Smartstone::LoadCostumes()
 {
     // Load costumes from the database
-    QueryResult result = WorldDatabase.Query("SELECT DisplayId, Category, SubscriptionLevel, Duration, Description, Id FROM smartstone_costumes WHERE Enabled = 1");
+    QueryResult result = WorldDatabase.Query("SELECT DisplayId, Category, SubscriptionLevel, Duration, Description, Id, Scale FROM smartstone_costumes WHERE Enabled = 1");
     SmartstoneCostumeData costumeData;
     Costumes.clear();
     if (result)
@@ -64,6 +64,7 @@ void Smartstone::LoadCostumes()
             costumeData.Duration = fields[3].Get<uint32>();
             costumeData.Description = fields[4].Get<std::string>();
             costumeData.Id = fields[5].Get<uint32>();
+            costumeData.Scale = fields[6].Get<float>();
             Costumes[category].push_back(costumeData);
 
             MenuItems[category].push_back(MenuItem{
@@ -161,6 +162,36 @@ void Smartstone::LoadCategories()
     }
 }
 
+void Smartstone::LoadAuras()
+{
+    // Load auras from the database
+    QueryResult result = WorldDatabase.Query("SELECT Id, SpellId, Description, SubscriptionLevel FROM smartstone_auras WHERE Enabled = 1");
+    SmartstoneAuraData auraData;
+
+    Auras.clear();
+
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            auraData.Id = fields[0].Get<uint32>();
+            auraData.SpellID = fields[1].Get<uint32>();
+            auraData.Description = fields[2].Get<std::string>();
+            auraData.SubscriptionLevelRequired = fields[3].Get<uint8>();
+            Auras.push_back(auraData);
+            MenuItems[ACTION_TYPE_AURA].push_back(MenuItem{
+                auraData.Id,
+                auraData.Description,
+                0, // NpcTextId
+                GOSSIP_ICON_TABARD,
+                ACTION_TYPE_AURA,
+                auraData.SubscriptionLevelRequired
+                });
+        } while (result->NextRow());
+    }
+}
+
 SmartstoneServiceExpireInfo Smartstone::GetServiceExpireInfo(uint32 playerGUID, uint32 serviceId, uint8 serviceType) const
 {
     auto const& expireInfo = ServiceExpireInfo.find(playerGUID);
@@ -251,6 +282,20 @@ SmartstoneCostumeData Smartstone::GetCostumeData(uint32 id) const
     return defaultCostume;
 }
 
+SmartstoneAuraData Smartstone::GetAuraData(uint32 id) const
+{
+    for (auto const& aura : Auras)
+    {
+        if (aura.Id == id)
+            return aura;
+    }
+
+    // Return empty/default aura data with Id = 0 to indicate not found
+    SmartstoneAuraData defaultCostume = {};
+    defaultCostume.Id = 0;
+    return defaultCostume;
+}
+
 Milliseconds Smartstone::GetCostumeDuration(Player* player, uint32 costumeDuration) const
 {
     // If the costume has a duration override set in database, use it instead
@@ -318,7 +363,7 @@ bool Smartstone::IsPetAvailable(Player* player, SmartstonePetData pet, uint8 sub
         }
     }
 
-    return player->GetPlayerSetting(setting, pet.CreatureId).IsEnabled();
+    return player->GetPlayerSetting(setting, pet.GetId()).IsEnabled();
 }
 
 bool Smartstone::IsServiceAvailable(Player* player, std::string service, uint32 serviceId) const
@@ -354,6 +399,8 @@ std::string Smartstone::GetModuleStringForService(uint8 serviceType) const
             return ModName + "#combatpet";
         case ACTION_TYPE_COSTUME:
             return ModName + "#costume";
+        case ACTION_TYPE_AURA:
+            return ModName + "#aura";
         default:
             return "";
     }

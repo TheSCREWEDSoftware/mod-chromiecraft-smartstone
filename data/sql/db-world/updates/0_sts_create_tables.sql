@@ -3,7 +3,7 @@
 -- It should not be reapplied.
 --
 
-CREATE TABLE `smartstone_pets` (
+CREATE TABLE IF NOT EXISTS `smartstone_pets` (
  `CreatureId` INT UNSIGNED NOT NULL,
  `Category` TINYINT DEFAULT 0,
  `SubscriptionLevel` TINYINT DEFAULT 0, -- if set, pet will be available for free for that sub level
@@ -13,9 +13,10 @@ CREATE TABLE `smartstone_pets` (
  PRIMARY KEY(`CreatureId`)
  );
 
-CREATE TABLE `smartstone_costumes` (
+CREATE TABLE IF NOT EXISTS `smartstone_costumes` (
  `Id` INT UNSIGNED NOT NULL,
  `DisplayId` INT UNSIGNED NOT NULL,
+ `Scale` FLOAT NOT NULL DEFAULT 1,
  `Category` TINYINT DEFAULT 0,
  `SubscriptionLevel` TINYINT DEFAULT 0,
  `Duration` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -24,7 +25,7 @@ CREATE TABLE `smartstone_costumes` (
  PRIMARY KEY(`Id`)
  );
 
-CREATE TABLE `smartstone_services` (
+CREATE TABLE IF NOT EXISTS `smartstone_services` (
  `ServiceId` INT UNSIGNED NOT NULL,
  `Title` TEXT,
  `SubscriptionLevel` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -32,7 +33,7 @@ CREATE TABLE `smartstone_services` (
  PRIMARY KEY(`ServiceId`)
  );
 
-CREATE TABLE `smartstone_categories` (
+CREATE TABLE IF NOT EXISTS `smartstone_categories` (
  `Id` INT UNSIGNED NOT NULL,
  `CategoryType` INT UNSIGNED NOT NULL,
  `Title` TEXT,
@@ -40,4 +41,12 @@ CREATE TABLE `smartstone_categories` (
  `NPCTextId` INT DEFAULT 0,
  `Enabled` TINYINT,
  PRIMARY KEY(`Id`)
- );
+);
+
+CREATE TABLE IF NOT EXISTS `smartstone_auras` (
+ `Id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ `SpellID` INT UNSIGNED NOT NULL,
+ `Description` TEXT,
+ `SubscriptionLevel` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+ `Enabled` TINYINT NOT NULL DEFAULT 1
+);

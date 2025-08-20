@@ -73,126 +73,116 @@ public:
             return false;
         }
 
+        std::string playerName;
+        sCharacterCache->GetCharacterNameByGuid(player.GetGUID(), playerName);
+
+        std::string module = sSmartstone->GetModuleStringForService(serviceType);
+
         Player* target = player.GetConnectedPlayer();
 
-        if (!target)
-        {
-            handler->SendErrorMessage("The player is not online.");
-            return false;
-        }
+        auto sendDupError = [&](std::string_view desc) {
+            handler->SendErrorMessage("The {} is already {}.", desc, add ? "unlocked" : "locked");
+        };
 
-        std::string ModuleString = sSmartstone->GetModuleStringForService(serviceType);
+        auto sendSuccess = [&](std::string_view desc) {
+            handler->PSendSysMessage("{} has been {} for {}.", desc, add ? "unlocked" : "removed", playerName);
+        };
 
-        if (add)
+        switch (serviceType)
         {
-            switch (serviceType)
+            case ACTION_TYPE_COMPANION:
+            case ACTION_TYPE_PET:
             {
-                case ACTION_TYPE_COMPANION:
-                case ACTION_TYPE_PET:
+                SmartstonePetData pet = sSmartstone->GetPetData(id, serviceType);
+                if (!pet.CreatureId)
                 {
-                    SmartstonePetData petData = sSmartstone->GetPetData(id, serviceType);
-
-                    if (!petData.CreatureId)
-                    {
-                        handler->SendErrorMessage("The pet {} does not exist.", id);
-                        return false;
-                    }
-
-                    uint32 relativeID = sSmartstone->GetActionTypeId(static_cast<ActionType>(serviceType), petData.CreatureId);
-
-                    if (target->GetPlayerSetting(ModuleString, relativeID).IsEnabled())
-                    {
-                        handler->SendErrorMessage("The pet {} is already unlocked.", petData.Description);
-                        return false;
-                    }
-
-                    if (petData.Duration)
-                    {
-                        uint32 expireDate = 0;
-                        if (petData.Duration > 31556926)
-                            expireDate = petData.Duration;
-                        else
-                            expireDate = GameTime::GetGameTime().count() + petData.Duration;
-
-                        CharacterDatabase.Execute("INSERT INTO smartstone_char_temp_services (PlayerGUID, ServiceId, ServiceType, ActivationTime, ExpirationTime) VALUES ({}, {}, {}, UNIX_TIMESTAMP(), {})",
-                            target->GetGUID().GetCounter(), petData.CreatureId, serviceType, expireDate);
-
-                        SmartstoneServiceExpireInfo expireInfo;
-                        expireInfo.PlayerGUID = target->GetGUID().GetCounter();
-                        expireInfo.ServiceId = petData.CreatureId;
-                        expireInfo.ServiceType = serviceType;
-                        expireInfo.ActivationTime = GameTime::GetGameTime().count();
-                        expireInfo.ExpirationTime = expireDate;
-                        sSmartstone->ServiceExpireInfo[target->GetGUID().GetCounter()].push_back(expireInfo);
-                    }
-
-                    target->UpdatePlayerSetting(ModuleString, relativeID, true);
-                    handler->PSendSysMessage("The pet {} has been unlocked for {}.", petData.Description, target->GetName());
-                    break;
-                }
-                case ACTION_TYPE_COSTUME:
-                {
-                    SmartstoneCostumeData costume = sSmartstone->GetCostumeData(id);
-
-                    if (!costume.DisplayId)
-                    {
-                        handler->SendErrorMessage("The costume {} does not exist.", id);
-                        return false;
-                    }
-
-                    if (target->GetPlayerSetting(ModuleString, id).IsEnabled())
-                    {
-                        handler->SendErrorMessage("The costume {} is already unlocked.", costume.Description);
-                        return false;
-                    }
-
-                    target->UpdatePlayerSetting(ModuleString, id, true);
-                    handler->PSendSysMessage("The costume {} has been unlocked for {}.", costume.Description, target->GetName());
-                    break;
+                    handler->SendErrorMessage("The pet {} does not exist.", id);
+                    return false;
                 }
 
+                uint32 settingId = sSmartstone->GetActionTypeId(static_cast<ActionType>(serviceType), pet.CreatureId);
+
+                if (target && target->GetPlayerSetting(module, settingId).IsEnabled() == add)
+                {
+                    sendDupError(pet.Description);
+                    return false;
+                }
+
+                if (target && add && pet.Duration)
+                {
+                    uint32 expiration = (pet.Duration > 31556926)
+                        ? pet.Duration
+                        : GameTime::GetGameTime().count() + pet.Duration;
+
+                    CharacterDatabase.Execute(
+                        "INSERT INTO smartstone_char_temp_services (PlayerGUID, ServiceId, Category, ActivationTime, ExpirationTime) VALUES ({}, {}, {}, UNIX_TIMESTAMP(), {})",
+                        target->GetGUID().GetCounter(), pet.CreatureId, serviceType, expiration);
+
+                    SmartstoneServiceExpireInfo expireInfo;
+                    expireInfo.PlayerGUID = target->GetGUID().GetCounter();
+                    expireInfo.ServiceId = pet.CreatureId;
+                    expireInfo.ServiceType = serviceType;
+                    expireInfo.ActivationTime = GameTime::GetGameTime().count();
+                    expireInfo.ExpirationTime = expiration;
+                    sSmartstone->ServiceExpireInfo[target->GetGUID().GetCounter()].push_back(expireInfo);
+                }
+
+                if (target)
+                    target->UpdatePlayerSetting(module, settingId, add);
+
+                sendSuccess(pet.Description);
+                break;
             }
-        }
-        else
-        {
-            switch (serviceType)
+
+            case ACTION_TYPE_COSTUME:
             {
-                case ACTION_TYPE_COMPANION:
-                case ACTION_TYPE_PET:
+                SmartstoneCostumeData costume = sSmartstone->GetCostumeData(id);
+                if (!costume.DisplayId)
                 {
-                    SmartstonePetData petData = sSmartstone->GetPetData(id, serviceType);
-                    if (!target->GetPlayerSetting(ModuleString, id).IsEnabled())
-                    {
-                        handler->PSendSysMessage("The player does not have the pet {}.", petData.Description);
-                        handler->SetSentErrorMessage(true);
-                        return false;
-                    }
-
-                    target->UpdatePlayerSetting(ModuleString, id, false);
-                    handler->PSendSysMessage("The pet {} has been removed for {}.", petData.Description, target->GetName());
-                    break;
+                    handler->SendErrorMessage("The costume {} does not exist.", id);
+                    return false;
                 }
-                case ACTION_TYPE_COSTUME:
+
+                if (target && target->GetPlayerSetting(module, id).IsEnabled() == add)
                 {
-                    SmartstoneCostumeData costume = sSmartstone->GetCostumeData(id);
-
-                    if (!costume.DisplayId)
-                    {
-                        handler->SendErrorMessage("The costume {} does not exist.", id);
-                        return false;
-                    }
-
-                    if (!target->GetPlayerSetting(ModuleString, id).IsEnabled())
-                    {
-                        handler->SendErrorMessage("The player does not have the costume {}.", costume.Description);
-                        return false;
-                    }
-
-                    target->UpdatePlayerSetting(ModuleString, id, false);
-                    handler->PSendSysMessage("The costume {} has been removed for {}.", costume.Description, target->GetName());
-                    break;
+                    sendDupError(costume.Description);
+                    return false;
                 }
+
+                if (target)
+                    target->UpdatePlayerSetting(module, id, add);
+                else
+                {
+                    PlayerSettingsStore::UpdateSetting(player.GetGUID().GetCounter(), module, id, add);
+                }
+
+                sendSuccess(costume.Description);
+                break;
             }
+
+            case ACTION_TYPE_AURA:
+            {
+                SmartstoneAuraData aura = sSmartstone->GetAuraData(id);
+                if (!aura.SpellID)
+                {
+                    handler->SendErrorMessage("The aura {} does not exist.", id);
+                    return false;
+                }
+
+                if (target->GetPlayerSetting(module, id).IsEnabled() == add)
+                {
+                    sendDupError(aura.Description);
+                    return false;
+                }
+
+                target->UpdatePlayerSetting(module, id, add);
+                sendSuccess(aura.Description);
+                break;
+            }
+
+            default:
+                handler->SendErrorMessage("Unknown service type.");
+                return false;
         }
 
         return true;

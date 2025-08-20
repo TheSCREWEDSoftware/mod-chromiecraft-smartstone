@@ -46,7 +46,8 @@ public:
         auto costumes = sSmartstone->Costumes;
 
         const auto actionKey = sSmartstone->DecodeActionId(action);
-        if (!actionKey.has_value()) {
+        if (!actionKey.has_value())
+        {
             player->SendSystemMessage("Invalid action selected.");
             return;
         }
@@ -57,7 +58,8 @@ public:
          * @todo: refactor in multiple functions
          *
          */
-        switch (actionType) {
+        switch (actionType)
+        {
             case ACTION_TYPE_CATEGORY:
             {
                 // Save current state before navigating to new category
@@ -66,8 +68,10 @@ public:
                 ShowCategoryItems(actionId, player, item, subscriptionLevel);
                 return;
             }
-            case ACTION_TYPE_UTIL: {
-                switch(actionId) {
+            case ACTION_TYPE_UTIL:
+            {
+                switch (actionId)
+                {
                     case SMARTSTONE_ACTION_BACK:
                     {
                         auto _menuHistory = sSmartstone->MenuStateHolder[player->GetGUID()];
@@ -119,6 +123,11 @@ public:
                             player->DeMorph();
                             sSmartstone->SetCurrentCostume(player, 0);
                         }
+                        break;
+                    }
+                    case SMARTSTONE_ACTION_REMOVE_AURA:
+                    {
+                        sSmartstone->removeCurrentAura(player);
                         break;
                     }
                 }
@@ -198,6 +207,7 @@ public:
 
                 SmartstoneCostumeData costume = sSmartstone->GetCostumeData(actionId);
                 player->SetDisplayId(costume.DisplayId);
+                player->SetObjectScale(costume.Scale);
                 sSmartstone->SetCurrentCostume(player, costume.DisplayId);
 
                 player->AddSpellCooldown(90002, 0, 30 * MINUTE * IN_MILLISECONDS);
@@ -210,6 +220,22 @@ public:
                             player->SetDisplayId(player->GetNativeDisplayId());
                     }, duration);
                 }
+                break;
+            }
+            case ACTION_TYPE_AURA:
+            {
+                SmartstoneAuraData aura = sSmartstone->GetAuraData(actionId);
+                if (player->HasAura(aura.SpellID))
+                {
+                    player->SendSystemMessage("You already have this aura active.");
+                    break;
+                }
+
+                sSmartstone->removeCurrentAura(player);
+
+                sSmartstone->SetCurrentAura(player, aura.SpellID);
+                player->AddAura(aura.SpellID, player);
+                player->SendSystemMessage(aura.Description + " is now active.");
                 break;
             }
             case ACTION_TYPE_NONE:
@@ -232,7 +258,8 @@ public:
             return false;
 
         // Check if smartstone data is properly initialized
-        if (sSmartstone->MenuItems.empty()) {
+        if (sSmartstone->MenuItems.empty())
+        {
             player->SendSystemMessage("Smartstone is not properly configured. Please contact an administrator.");
             return false;
         }
@@ -324,8 +351,12 @@ public:
             _currentMenuState[player->GetGUID()].currentPage = currentPage;
 
             // Check if category exists
-            if (sSmartstone->MenuItems.find(ParentCategoryId) == sSmartstone->MenuItems.end()) {
+            if (sSmartstone->MenuItems.find(ParentCategoryId) == sSmartstone->MenuItems.end())
+            {
                 player->SendSystemMessage("Category not found.");
+
+                ClearMenuHistory(player);
+                ShowMainMenu(player, item, GetPlayerSubscriptionLevel(player));
                 return;
             }
 
@@ -355,6 +386,9 @@ public:
 
             if (sSmartstone->GetCurrentCostume(player))
                 player->PlayerTalkClass->GetGossipMenu().AddMenuItem(menuItemIndex++, 0, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|t Remove current costume", 0, sSmartstone->GetActionTypeId(ACTION_TYPE_UTIL, SMARTSTONE_ACTION_REMOVE_COSTUME), "", 0);
+
+            if (sSmartstone->GetCurrentAura(player))
+                player->PlayerTalkClass->GetGossipMenu().AddMenuItem(menuItemIndex++, 0, "|TInterface/icons/Spell_Nature_WispSplode:30:30:-18:0|t Remove current aura", 0, sSmartstone->GetActionTypeId(ACTION_TYPE_UTIL, SMARTSTONE_ACTION_REMOVE_AURA), "", 0);
 
             uint32 totalItems = menuItems.size();
             uint32 startIndex = pageNumber * itemsPerPage;
@@ -424,6 +458,17 @@ public:
                         reduceCounters();
                 }
 
+                if (menuItem.ServiceType == ACTION_TYPE_AURA)
+                {
+                    if (sSmartstone->IsServiceAvailable(player, "#aura", menuItem.ItemId)
+                        || subscriptionLevel >= menuItem.SubscriptionLevelRequired)
+                    {
+                        player->PlayerTalkClass->GetGossipMenu().AddMenuItem(menuItemIndex++, GOSSIP_ICON_CHAT, menuItem.Text, 0, sSmartstone->GetActionTypeId(ACTION_TYPE_AURA, menuItem.ItemId), "", 0);
+                    }
+                    else if (totalItems > 0)
+                        reduceCounters();
+                }
+
                 if (menuItem.ServiceType == ACTION_TYPE_CATEGORY)
                 {
                     if (sSmartstone->IsServiceAvailable(player, "#category", menuItem.ItemId)
@@ -470,7 +515,7 @@ public:
 
             player->PlayerTalkClass->SendGossipMenu(92000, item->GetGUID());
         }
-};
+    };
 
 class mod_chromiecraft_smartstone_worldscript : public WorldScript
 {
@@ -492,12 +537,29 @@ public:
             sSmartstone->LoadCostumes();
             sSmartstone->LoadServiceExpirationInfo();
             sSmartstone->LoadCategories();
+            sSmartstone->LoadAuras();
         }
     }
+};
+
+class mod_chromiecraft_smartstone_playerscript : public PlayerScript
+{
+public:
+    mod_chromiecraft_smartstone_playerscript() : PlayerScript("mod_chromiecraft_smartstone_playerscript") { }
+
+    void OnPlayerBeforeLogout(Player* player) override
+    {
+        if (sSmartstone->IsSmartstoneEnabled())
+        {
+            sSmartstone->removeCurrentAura(player);
+        }
+    }
+
 };
 
 void Addmod_cc_smartstoneScripts()
 {
     new item_chromiecraft_smartstone();
     new mod_chromiecraft_smartstone_worldscript();
+    new mod_chromiecraft_smartstone_playerscript();
 }
